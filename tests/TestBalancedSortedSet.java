@@ -41,7 +41,7 @@ public class TestBalancedSortedSet extends AbstractSetTest {
 
     private static final Class<?>[] testClasses = (Class<?>[]) new Class<?>[]{
             AVLTree.class,
-            RedBlackTree.class,
+           // RedBlackTree.class,
     };
 
     @SuppressWarnings("unchecked")
