@@ -240,7 +240,7 @@ public class AVLTree<E extends Comparable<E>> extends AbstractSet<E> implements 
      * Правый поворот вокруг v
      * @param v
      */
-    Node rightRotate(Node v)
+    private Node rightRotate(Node v)
     {
         if (v == null) return v;
         Node x = v.left;
