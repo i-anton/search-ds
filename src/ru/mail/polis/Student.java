@@ -23,10 +23,30 @@ public class Student extends CheckedOpenHashTableEntity {
     private String email;
     private String mobile; //Номер телефона
 
+
+    //двойное хеширование
+    private int h1(int tableSize)
+    {
+        return hashCode() % tableSize;
+    }
+
+    private int h2(int tableSize)
+    {
+        int hash = 1 + (hashCode() % ( tableSize - 1 ));
+        if (hash % 2 == 0)
+        {
+            hash++;
+        }
+        hash %= ( tableSize - 1 );
+        if (hash == 0)
+            hash++;
+        return hash;
+    }
+
     @Override
     public int hashCode(int tableSize, int probId) throws IllegalArgumentException {
-        //todo: реализуйте этот метод
-        return 0;
+        if (tableSize < 0 || probId >= tableSize) throw new IllegalArgumentException();
+        return Math.abs(h1(tableSize) + probId * h2(tableSize)) % tableSize;
     }
 
     public enum  Gender {
