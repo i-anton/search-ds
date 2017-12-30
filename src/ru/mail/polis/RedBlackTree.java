@@ -67,6 +67,7 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
         while(node != root && node.color == Color.BLACK) {
             if(node == node.parent.left) {
                 temp = node.parent.right;
+
                 if(temp.color == Color.RED) {
                     temp.color = Color.BLACK;
                     node.parent.color = Color.RED;
@@ -104,7 +105,7 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
                     node = node.parent;
                 }
                 else {
-                    if(temp.left.color == Color.BLACK) {
+                    if( temp.left.color == Color.BLACK) {
                         temp.right.color = Color.BLACK;
                         temp.color = Color.RED;;
                         leftRotate(temp);
@@ -134,16 +135,16 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
         @SuppressWarnings("unchecked")
         E value = (E) object;
         Node<E> curr = root;
-        while (curr != emptyNode)
+        while ( curr != emptyNode && curr != null)
         {
             if (compare(value, curr.value) < 0)
-                curr = curr.left;
+                curr = curr.left; else
             if (compare(value, curr.value) > 0)
-                curr = curr.right;
+                curr = curr.right; else
             if (compare(value, curr.value) == 0)
                 break;
         }
-        if (compare(value, curr.value) == 0) {
+        if (curr != emptyNode && compare(value, curr.value) == 0) {
             Node temp = emptyNode, successor = emptyNode;
             if (curr == null || curr == emptyNode)
                 return false;
@@ -151,10 +152,12 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
                 successor = curr;
             else
                 successor = curr.getSuccessor();
+
             if (!successor.isLeftFree())
                 temp = successor.left;
             else
                 temp = successor.right;
+
             temp.parent = successor.parent;
             if (successor.isParentFree())
                 root = temp;
@@ -175,8 +178,6 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
         }
         return false;
     }
-
-
 
 
     /**
@@ -210,7 +211,7 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
      */
     @Override
     public E first() {
-        if (root == null) {
+        if (root == null || root == emptyNode) {
             throw new NoSuchElementException("first");
         }
         Node curr = root;
@@ -228,7 +229,7 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
      */
     @Override
     public E last() {
-        if (root == null) {
+        if (root == null || root == emptyNode) {
             throw new NoSuchElementException("first");
         }
         Node curr = root;
