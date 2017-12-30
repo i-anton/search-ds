@@ -23,10 +23,58 @@ public class Student extends CheckedOpenHashTableEntity {
     private String email;
     private String mobile; //Номер телефона
 
+
+    private int h1(int tableSize)
+    {
+        return hashCode() % tableSize;
+    }
+
+
+    private int myHash(int x)
+    {
+        int hash = 0;
+        int currByte;
+        for (int i = 0; i < Integer.BYTES; i++)
+        {
+            currByte = (x >> (i * 8))  & 255;
+            hash += currByte;
+            hash += (hash << 10);
+            hash ^= (hash >> 6);
+        }
+        hash +=  (hash << 3);
+        hash ^= (hash >> 11);
+        hash += (hash << 15);
+        return hash ;
+    }
+
+    private int h2(int tableSize)
+    {
+        int hash = myHash((int) (id ^ (id >>> 32)));
+        hash = 31 * hash + myHash(firstName.hashCode());
+        hash = 31 * hash + myHash(lastName.hashCode());
+        hash = 31 * hash + myHash(gender.hashCode());
+        hash = 31 * hash + myHash(birthday.hashCode());
+        hash = 31 * hash + myHash(groupId);
+        hash =  31 * hash + myHash(yearOfAdmission);
+        hash = 31 * hash + myHash(photoReference != null ? photoReference.hashCode() : 0);
+        hash = 31 * hash + myHash(email != null ? email.hashCode() : 0);
+        hash = 31 * hash + myHash(mobile != null ? mobile.hashCode() : 0);
+        hash = (1 + (Math.abs(hash) % ( tableSize - 1 )));
+        if (hash % 2 == 0)
+        {
+            hash++;
+        }
+        hash %= ( tableSize - 1 );
+        if (hash == 0)
+            hash++;
+
+        return hash;
+    }
+
     @Override
     public int hashCode(int tableSize, int probId) throws IllegalArgumentException {
-        //todo: реализуйте этот метод
-        return 0;
+        if (tableSize < 0 || probId >= tableSize) throw new IllegalArgumentException();
+        return (Math.abs(h1(tableSize)) + probId * Math.abs(h2(tableSize))) % tableSize;
     }
 
     public enum  Gender {
