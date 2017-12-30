@@ -2,7 +2,9 @@ package ru.mail.polis;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import ru.mail.polis.Student.Gender;
 
