@@ -45,12 +45,12 @@ public class OpenHashTable<E extends OpenHashTableEntity> extends AbstractSet<E>
      */
     @Override
     public boolean add(E value) {
-        int hash = value.hashCode(table.length, 1);
+        int hash = value.hashCode(table.length, 0);
         if (table[hash] == null) {
             table[hash] = value;
         } else
         {
-            int probe =  2;
+            int probe =  1;
             while (table[hash] != null && !value.equals(table[hash]) && !deleted[hash]) {
                 hash = value.hashCode(table.length, probe++);
             }
@@ -77,7 +77,7 @@ public class OpenHashTable<E extends OpenHashTableEntity> extends AbstractSet<E>
     public boolean remove(Object object) {
         @SuppressWarnings("unchecked")
         E value = (E) object;
-        int hash = value.hashCode(table.length, 1);
+        int hash = value.hashCode(table.length, 0);
         if (value.equals(table[hash]))
         {
             deleted[hash] = true;
@@ -85,7 +85,7 @@ public class OpenHashTable<E extends OpenHashTableEntity> extends AbstractSet<E>
             size--;
             return true;
         }
-        int probe = 2;
+        int probe = 1;
         while (table[hash] != null && !value.equals(table[hash]) || deleted[hash]) {
             hash = value.hashCode(table.length, probe++);
         }
@@ -111,10 +111,10 @@ public class OpenHashTable<E extends OpenHashTableEntity> extends AbstractSet<E>
     public boolean contains(Object object) {
         @SuppressWarnings("unchecked")
         E value = (E) object;
-        int hash = value.hashCode(table.length, 1);
+        int hash = value.hashCode(table.length, 0);
         if (value.equals(table[hash]))
             return true;
-        int probe = 2;
+        int probe = 1;
         while (table[hash] != null && !value.equals(table[hash]) || deleted[hash]) {
             hash = value.hashCode(table.length, probe++);
         }
