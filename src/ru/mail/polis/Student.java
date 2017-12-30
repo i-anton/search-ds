@@ -33,9 +33,7 @@ public class Student extends CheckedOpenHashTableEntity{
     public int hashCode(int tableSize, int probId) throws IllegalArgumentException {
         //todo: реализуйте этот метод
         if ((probId < 0) || (probId > tableSize)) throw new IllegalArgumentException("probId is not in bound of table");
-        int h1 = generateCommonHash(tableSize);
-        int h2 = generateSubHash(tableSize);
-        int result = Math.abs(h1 + probId * h2) % tableSize ;
+        int result = Math.abs(generateCommonHash(tableSize) + probId * generateSubHash(tableSize)) % tableSize ;
         return result;
     }
 
