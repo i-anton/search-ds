@@ -27,7 +27,8 @@ public class Student extends CheckedOpenHashTableEntity{
 
     boolean deleted = false;
 
-    private int hash = 0;
+    private Integer hash = null;
+    private Integer subHash = null;
 
     @Override
     public int hashCode(int tableSize, int probId) throws IllegalArgumentException {
@@ -45,11 +46,23 @@ public class Student extends CheckedOpenHashTableEntity{
     }
 
     private int generateSubHash(int tableSize){
-        int result = Math.abs(this.hashCode());
-        result = Math.abs(result + 453) % tableSize;
+        if (subHash != null) return subHash;
+        int result = (int) (id ^ (id >>> 32));
+        result = 1337 * result + firstName.hashCode();
+        result = 1337 * result + lastName.hashCode();
+        result = 1337 * result + gender.hashCode();
+        result = 1337 * result + birthday.hashCode();
+        result = 1337 * result + groupId;
+        result = 1337 * result + yearOfAdmission;
+        result = 1337 * result + (photoReference != null ? photoReference.hashCode() : 0);
+        result = 1337 * result + (email != null ? email.hashCode() : 0);
+        result = 1337 * result + (mobile != null ? mobile.hashCode() : 0);
+        result = Math.abs(result) % tableSize;
+        if (result == 0 ) return 1;
         if (result % 2 == 0)
             result--;
-        return Math.abs(result);
+        subHash = new Integer(result);
+        return subHash;
     }
 
     public enum  Gender {
@@ -158,7 +171,7 @@ public class Student extends CheckedOpenHashTableEntity{
 
     @Override
     public int hashCode() {
-        if (hash != 0) return hash;
+        if (hash != null) return hash;
         int result = (int) (id ^ (id >>> 32));
         result = 31 * result + firstName.hashCode();
         result = 31 * result + lastName.hashCode();
@@ -169,7 +182,7 @@ public class Student extends CheckedOpenHashTableEntity{
         result = 31 * result + (photoReference != null ? photoReference.hashCode() : 0);
         result = 31 * result + (email != null ? email.hashCode() : 0);
         result = 31 * result + (mobile != null ? mobile.hashCode() : 0);
-        hash = result;
+        hash = new Integer(result);
         return hash;
     }
 
