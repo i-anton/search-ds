@@ -8,6 +8,8 @@ import java.time.LocalDate;
  */
 public class Student extends CheckedOpenHashTableEntity {
 
+    private final double HASH_A = 0.6180339887;
+
     private static int counter = 0;
 
     //NotNullable поля
@@ -25,8 +27,16 @@ public class Student extends CheckedOpenHashTableEntity {
 
     @Override
     public int hashCode(int tableSize, int probId) throws IllegalArgumentException {
-        //todo: реализуйте этот метод
-        return 0;
+        return Math.abs(h1(tableSize) + probId * h2(tableSize)) % tableSize;
+    }
+
+    private int h1(int tableSize) {
+        return Math.abs(hashCode()) % tableSize;
+    }
+
+    private int h2(int tableSIze) {
+        int hash = (int) (tableSIze * (HASH_A * Math.abs(hashCode29()) - (int) (HASH_A * Math.abs(hashCode29()))));
+        return hash + (1 - (hash % 2));
     }
 
     public enum  Gender {
@@ -135,6 +145,20 @@ public class Student extends CheckedOpenHashTableEntity {
         result = 31 * result + (photoReference != null ? photoReference.hashCode() : 0);
         result = 31 * result + (email != null ? email.hashCode() : 0);
         result = 31 * result + (mobile != null ? mobile.hashCode() : 0);
+        return result;
+    }
+
+    public int hashCode29() {
+        int result = (int) (id ^ (id >>> 32));
+        result = 29 * result + firstName.hashCode();
+        result = 29 * result + lastName.hashCode();
+        result = 29 * result + gender.hashCode();
+        result = 29 * result + birthday.hashCode();
+        result = 29 * result + groupId;
+        result = 29 * result + yearOfAdmission;
+        result = 29 * result + (photoReference != null ? photoReference.hashCode() : 0);
+        result = 29 * result + (email != null ? email.hashCode() : 0);
+        result = 29 * result + (mobile != null ? mobile.hashCode() : 0);
         return result;
     }
 
