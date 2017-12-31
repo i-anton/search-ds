@@ -8,7 +8,7 @@ public class OpenHashTable<E extends OpenHashTableEntity> extends AbstractSet<E>
     private final int INITIAL_CAPACITY = 8;
     private int size; //количество элементов в хеш-таблице
     private E[] table;
-    private final OpenHashTableEntity DELETED = (tableSize, probId) -> 0;
+    private final E DELETED = (E) (OpenHashTableEntity) (tableSize, probId) -> 0;
 
     public OpenHashTable() {
         table = (E[]) new OpenHashTableEntity[INITIAL_CAPACITY];
@@ -31,7 +31,8 @@ public class OpenHashTable<E extends OpenHashTableEntity> extends AbstractSet<E>
         if (empty(idx)) {
             table[idx] = value;
         } else {
-            for (int i = 0; i < table.length && !empty(idx); i++) {
+            if (value.equals(table[idx])) return false;
+            for (int i = 1; i < table.length && !empty(idx); i++) {
                 idx = value.hashCode(table.length, i);
                 if (value.equals(table[idx])) {
                     return false;
@@ -58,18 +59,17 @@ public class OpenHashTable<E extends OpenHashTableEntity> extends AbstractSet<E>
         int idx = value.hashCode(table.length, 0);
         if (!empty(idx)) {
             if (value.equals(table[idx])) {
-                table[idx] = null;
+                table[idx] = DELETED;
                 size--;
                 return true;
-            } else {
-                for (int i = 0; i < table.length; i++) {
-                    idx = value.hashCode(table.length, i);
-                    if (value.equals(table[idx])) {
-                        table[idx] = null;
-                        size--;
-                        return true;
-                    }
-                }
+            }
+        }
+        for (int i = 1; i < table.length; i++) {
+            idx = value.hashCode(table.length, i);
+            if (value.equals(table[idx])) {
+                table[idx] = DELETED;
+                size--;
+                return true;
             }
         }
         return false;
@@ -90,13 +90,12 @@ public class OpenHashTable<E extends OpenHashTableEntity> extends AbstractSet<E>
         if (!empty(idx)) {
             if (value.equals(table[idx])) {
                 return true;
-            } else {
-                for (int i = 1; i < table.length; i++) {
-                    idx = value.hashCode(table.length, i);
-                    if (value.equals(table[idx])) {
-                        return true;
-                    }
-                }
+            }
+        }
+        for (int i = 1; i < table.length; i++) {
+            idx = value.hashCode(table.length, i);
+            if (value.equals(table[idx])) {
+                return true;
             }
         }
         return false;
@@ -126,6 +125,24 @@ public class OpenHashTable<E extends OpenHashTableEntity> extends AbstractSet<E>
             OpenHashTable<E> newTable = new OpenHashTable<>(table.length * 2);
             newTable.addAll(Arrays.stream(table).filter(Objects::nonNull).collect(Collectors.toList()));
             table = newTable.table;
+        }
+    }
+
+    public static void main(String[] args) {
+        OpenHashTable<Student> table = new OpenHashTable<>();
+        Student[] students = new Student[20];
+        for (int i = 0; i < students.length; i++) {
+            students[i] = SimpleStudentGenerator.getInstance().generate();
+            table.add(students[i]);
+        }
+        System.out.println(table.size());
+        System.out.println("5 contains = " + table.contains(students[5]));
+        System.out.println(table.remove(students[5]));
+        System.out.println("5 contains = " + table.contains(students[5]));
+        System.out.println(table.remove(students[5]));
+        System.out.println("3 add = " + table.add(students[3]));
+        for (int i = 0; i < students.length; i++) {
+            System.out.println(table.contains(students[i]));
         }
     }
 }
