@@ -1,5 +1,7 @@
 package ru.mail.polis;
 
+import org.omg.CORBA.Object;
+
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.IntStream;
@@ -9,7 +11,7 @@ import java.util.stream.Stream;
  * Created by Nechaev Mikhail
  * Since 13/12/2017.
  */
-public interface OpenHashTableEntity {
+public interface OpenHashTableEntity{
 
     /**
      * Вычисляет значение хеша объекта (другими словами значение индекса ячейки в хеш-таблице)
@@ -24,6 +26,10 @@ public interface OpenHashTableEntity {
      * @return значение вычисленного хеша
      * @throws IllegalArgumentException если probIdx < 0 или probIdx >= tableSize
      */
+    boolean isDeleted();
+
+    void setDeleted();
+
     int hashCode(int tableSize, int probId) throws IllegalArgumentException;
 
 }

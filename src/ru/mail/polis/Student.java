@@ -1,12 +1,14 @@
 package ru.mail.polis;
 
 import java.time.LocalDate;
+import java.util.regex.Matcher;
+import java.util.zip.Checksum;
 
 /**
  * Created by Nechaev Mikhail
  * Since 13/12/2017.
  */
-public class Student extends CheckedOpenHashTableEntity {
+public class Student extends CheckedOpenHashTableEntity{
 
     private static int counter = 0;
 
@@ -23,14 +25,58 @@ public class Student extends CheckedOpenHashTableEntity {
     private String email;
     private String mobile; //Номер телефона
 
+    boolean deleted = false;
+
+    private Integer hash = null;
+    private Integer subHash = null;
+
     @Override
     public int hashCode(int tableSize, int probId) throws IllegalArgumentException {
         //todo: реализуйте этот метод
-        return 0;
+        if ((probId < 0) || (probId > tableSize)) throw new IllegalArgumentException("probId is not in bound of table");
+        int result = Math.abs(generateCommonHash(tableSize) + probId * generateSubHash(tableSize)) % tableSize ;
+        return result;
+    }
+
+    private int generateCommonHash(int tableSize){
+//        int multiplier = 10, coefficient = 1;
+        int result = 0;
+        result = Math.abs(this.hashCode());
+        return result;
+    }
+
+    private int generateSubHash(int tableSize){
+        if (subHash != null) return subHash;
+        int result = (int) (id ^ (id >>> 32));
+        result = 1337 * result + firstName.hashCode();
+        result = 1337 * result + lastName.hashCode();
+        result = 1337 * result + gender.hashCode();
+        result = 1337 * result + birthday.hashCode();
+        result = 1337 * result + groupId;
+        result = 1337 * result + yearOfAdmission;
+        result = 1337 * result + (photoReference != null ? photoReference.hashCode() : 0);
+        result = 1337 * result + (email != null ? email.hashCode() : 0);
+        result = 1337 * result + (mobile != null ? mobile.hashCode() : 0);
+        result = Math.abs(result) % tableSize;
+        if (result == 0 ) return 1;
+        if (result % 2 == 0)
+            result--;
+        subHash = new Integer(result);
+        return subHash;
     }
 
     public enum  Gender {
         MALE, FEMALE
+    }
+
+    @Override
+    public boolean isDeleted(){
+        return deleted;
+    }
+
+    @Override
+    public void setDeleted(){
+        deleted = true;
     }
 
     public Student(String firstName, String lastName, Gender gender, LocalDate birthday, int groupId, int yearOfAdmission) {
@@ -125,6 +171,7 @@ public class Student extends CheckedOpenHashTableEntity {
 
     @Override
     public int hashCode() {
+        if (hash != null) return hash;
         int result = (int) (id ^ (id >>> 32));
         result = 31 * result + firstName.hashCode();
         result = 31 * result + lastName.hashCode();
@@ -135,7 +182,8 @@ public class Student extends CheckedOpenHashTableEntity {
         result = 31 * result + (photoReference != null ? photoReference.hashCode() : 0);
         result = 31 * result + (email != null ? email.hashCode() : 0);
         result = 31 * result + (mobile != null ? mobile.hashCode() : 0);
-        return result;
+        hash = new Integer(result);
+        return hash;
     }
 
     @Override
@@ -151,6 +199,8 @@ public class Student extends CheckedOpenHashTableEntity {
                 ", photoReference='" + photoReference + '\'' +
                 ", email='" + email + '\'' +
                 ", mobile='" + mobile + '\'' +
+                ", hash='" + hash + '\'' +
+                ", deleted='" + deleted + '\'' +
                 '}';
     }
 }
