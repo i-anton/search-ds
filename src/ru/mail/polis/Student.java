@@ -8,6 +8,8 @@ import java.time.LocalDate;
  */
 public class Student extends CheckedOpenHashTableEntity {
 
+    private final double HASH_A = 0.6180339887;
+
     private static int counter = 0;
 
     //NotNullable поля
@@ -25,8 +27,16 @@ public class Student extends CheckedOpenHashTableEntity {
 
     @Override
     public int hashCode(int tableSize, int probId) throws IllegalArgumentException {
-        //todo: реализуйте этот метод
-        return 0;
+        return Math.abs(h1(tableSize) + probId * h2(tableSize)) % tableSize;
+    }
+
+    private int h1(int tableSize) {
+        return Math.abs(hashCode()) % tableSize;
+    }
+
+    private int h2(int tableSIze) {
+        int hash = (int) (tableSIze * (HASH_A * Math.abs(hashCode()) - (int) (HASH_A * Math.abs(hashCode()))));
+        return hash + (1 - (hash % 2));
     }
 
     public enum  Gender {
