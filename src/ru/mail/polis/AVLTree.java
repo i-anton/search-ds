@@ -10,9 +10,8 @@ public class AVLTree<E extends Comparable<E>> extends AbstractSet<E> implements 
 
     private final Comparator<E> comparator;
 
-    private BinarySearchTree.Node root; //todo: Создайте новый класс если нужно. Добавьте новые поля, если нужно.
+    private Node root;
     private int size;
-    //todo: добавьте дополнительные переменные и/или методы если нужно
 
     public AVLTree() {
         this(null);
@@ -31,23 +30,114 @@ public class AVLTree<E extends Comparable<E>> extends AbstractSet<E> implements 
      */
     @Override
     public boolean add(E value) {
-        //todo: следует реализовать
-        return false;
+        if (root == null) {
+            root = new Node(value);
+            size++;
+            return true;
+        } else {
+            try {
+                root = add(root,value);
+                return true;
+            } catch (RuntimeException e) {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Вставляет элемент в поддерево с корнем node
+     * @param node корень поддерева, в которое необходимо вставить элемент
+     * @param value элемент который необходимо вставить
+     * @return корень полученного дерева
+     * @throws RuntimeException если вставляемый элемент уже существует в дереве
+     */
+    private Node add(Node node, E value) throws RuntimeException {
+        if (node == null) {
+            node = new Node(value);
+            size++;
+            return node;
+        } else {
+            int cmp = compare(node.value,value);
+
+            if (cmp > 0) {
+                node.left = add(node.left,value);
+            } else if (cmp < 0) {
+                node.right = add(node.right,value);
+            } else {
+                throw new RuntimeException("Node already exists");
+            }
+
+            return balance(node);
+        }
     }
 
     /**
      * Удаляет элемент с таким же значением из дерева.
      * Инвариант: на вход всегда приходит NotNull объект, который имеет корректный тип
      *
-     * @param object элемент который необходимо вставить
+     * @param object элемент который необходимо удалить
      * @return true, если элемент содержался в дереве
      */
     @Override
     public boolean remove(Object object) {
         @SuppressWarnings("unchecked")
         E value = (E) object;
-        //todo: следует реализовать
-        return false;
+
+        try {
+            root = remove(root,value);
+            size--;
+            return true;
+        } catch (NoSuchElementException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Удаляет элемент с таким же значением из поддерева с корнем node.
+     * @param node корень поддерева, в котором нужно удалить заданный элемент
+     * @param value элемент который необходимо удалить
+     * @return корень полученного поддерева
+     * @throws NoSuchElementException если в поддереве нет элемента, который необходимо удалить
+     */
+    private Node remove(Node node, E value) throws NoSuchElementException {
+        if (node == null) {
+            throw new NoSuchElementException();
+        } else {
+            int cmp = compare(node.value,value);
+
+            if (cmp < 0) {
+                node.right = remove(node.right,value);
+            } else if (cmp > 0) {
+                node.left = remove(node.left,value);
+            } else {
+                Node leftNode = node.left;
+                Node rightNode = node.right;
+                node = null;
+                if (rightNode == null) {
+                    return leftNode;
+                }
+                Node minNode = findMin(rightNode);
+                minNode.right = removeMin(rightNode);
+                minNode.left = leftNode;
+                return balance(minNode);
+            }
+
+            return balance(node);
+        }
+    }
+
+    /**
+     * Удаляет наименьший элемент из заданного дерева
+     * @param node корень заданного поддерева
+     * @return возвращает правый узел наименьшего элемента
+     */
+    private Node removeMin(Node node) {
+        if (node.left == null) {
+            return  node.right;
+        } else {
+            node.left = removeMin(node.left);
+            return balance(node);
+        }
     }
 
     /**
@@ -61,7 +151,20 @@ public class AVLTree<E extends Comparable<E>> extends AbstractSet<E> implements 
     public boolean contains(Object object) {
         @SuppressWarnings("unchecked")
         E value = (E) object;
-        //todo: следует реализовать
+
+        if (root != null) {
+            Node curr = root;
+            while (curr != null) {
+                int cmp = compare(curr.value, value);
+                if (cmp == 0) {
+                    return true;
+                } else if (cmp < 0) {
+                    curr = curr.right;
+                } else {
+                    curr = curr.left;
+                }
+            }
+        }
         return false;
     }
 
@@ -72,10 +175,25 @@ public class AVLTree<E extends Comparable<E>> extends AbstractSet<E> implements 
      */
     @Override
     public E first() {
-        //todo: следует реализовать
-        throw new NoSuchElementException("first");
+        if (root == null) {
+            throw new NoSuchElementException("first");
+        } else {
+            Node min = root;
+            while (min.left != null) {
+                min = min.left;
+            }
+            return  min.value;
+        }
     }
 
+    /**
+     * Ищет узел с наименьшем элементом в поддереве с корнем node
+     * @param node корень поддерева, в котором ищем узел с наименьшим элементом
+     * @return узел с наименьшим элементом
+     */
+    private Node findMin(Node node) {
+        return node.left != null ? findMin(node.left) : node;
+    }
     /**
      * Ищет наибольший элемент в дереве
      * @return Возвращает наибольший элемент в дереве
@@ -83,9 +201,17 @@ public class AVLTree<E extends Comparable<E>> extends AbstractSet<E> implements 
      */
     @Override
     public E last() {
-        //todo: следует реализовать
-        throw new NoSuchElementException("last");
+        if (root == null) {
+            throw new NoSuchElementException("last");
+        } else {
+            Node max = root;
+            while (max.right != null) {
+                max = max.right;
+            }
+            return max.value;
+        }
     }
+
 
     private int compare(E v1, E v2) {
         return comparator == null ? v1.compareTo(v2) : comparator.compare(v1, v2);
@@ -98,7 +224,60 @@ public class AVLTree<E extends Comparable<E>> extends AbstractSet<E> implements 
 
     @Override
     public int size() {
-        return 0;
+        return size;
+    }
+
+    /**
+     * Выполняет балансировку дерева
+     * @param node узел, который мы балансируем
+     * @return возвращает корень полученного дерева
+     */
+    private Node balance(Node node) {
+        fixHeight(node);
+
+        if (balanceFactor(node) == 2) {
+            if (balanceFactor(node.right) < 0) {
+                node.right = rotateRight(node.right);
+            }
+            return rotateLeft(node);
+        }
+
+        if (balanceFactor(node) == -2) {
+            if (balanceFactor(node.left) > 0) {
+                node.left = rotateLeft(node.left);
+            }
+            return rotateRight(node);
+        }
+
+        return node; //Если балансировка не нужна
+    }
+
+    /**
+     * реализует малый левый поворот вокруг заданного узла.
+     * @param node узел, относительно которого происходит поворот
+     * @return возвращает корень полученного дерева
+     */
+    private Node rotateLeft(Node node) {
+        Node t =  node.right;
+        node.right = t.left;
+        t.left = node;
+        fixHeight(node);
+        fixHeight(t);
+        return t;
+    }
+
+    /**
+     * реализует малый правый поворот вокруг заданного узла.
+     * @param node узел, относительно которого происходит поворот
+     * @return возвращает корень полученного поддерева
+     */
+    private Node rotateRight(Node node) {
+        Node t =  node.left;
+        node.left = t.right;
+        t.right = node;
+        fixHeight(node);
+        fixHeight(t);
+        return t;
     }
 
     @Override
@@ -140,7 +319,7 @@ public class AVLTree<E extends Comparable<E>> extends AbstractSet<E> implements 
         traverseTreeAndCheckBalanced(root);
     }
 
-    private int traverseTreeAndCheckBalanced(BinarySearchTree.Node curr) throws NotBalancedTreeException {
+    private int traverseTreeAndCheckBalanced(Node curr) throws NotBalancedTreeException {
         if (curr == null) {
             return 1;
         }
@@ -153,4 +332,64 @@ public class AVLTree<E extends Comparable<E>> extends AbstractSet<E> implements 
         return Math.max(leftHeight, rightHeight) + 1;
     }
 
+    /**
+     * Обертка для поля height.
+     * @param node узел, у которого нужно узнать высоту
+     * @return если узел пустой возвращает 0, иначе высоту этого узла
+     */
+    private int height(Node node) {
+        return node == null ? 0 : node.height;
+    }
+
+    /**
+     * Находит разницу высот правого и левого поддеревьев (balance factor)
+     * @param node узел, у которого необходимо найти balance factor
+     * @return возвращает разницу высот правого и левого поддеревьев
+     */
+    private int balanceFactor(Node node) {
+        return height(node.right)-height(node.left);
+    }
+
+    /**
+     * Восстанавливает корректное значение поля height заданного узла (при условии,
+     * что значения этого поля в правом и левом дочерних узлах являются корректными
+     * @param node узел, у которого нужно восстановить корректное значение поля height
+     */
+    private void fixHeight(Node node) {
+        int leftHeight = height(node.left);
+        int rightHeight = height(node.right);
+        node.height = Math.max(leftHeight,rightHeight)+1;
+    }
+
+    private class Node {
+        E value;
+        Node left;
+        Node right;
+        int height;
+        Node(E value) {
+            this.value = value;
+            this.height = 1;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("N{");
+            sb.append("d=").append(value);
+            if (left != null) {
+                sb.append(", l=").append(left);
+            }
+            if (right != null) {
+                sb.append(", r=").append(right);
+            }
+            sb.append('}');
+            return sb.toString();
+        }
+    }
+
+
+
 }
+
+
+
+

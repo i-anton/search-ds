@@ -9,9 +9,8 @@ import java.util.SortedSet;
 public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implements BalancedSortedSet<E> {
 
     private final Comparator<E> comparator;
-    private Node root; //todo: Создайте новый класс если нужно. Добавьте новые поля, если нужно.
+    private Node<E> root;
     private int size;
-    //todo: добавьте дополнительные переменные и/или методы если нужно
 
     public RedBlackTree() {
         this(null);
@@ -29,8 +28,95 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
      */
     @Override
     public boolean add(E value) {
-        //todo: следует реализовать
-        return false;
+        Node<E> curr = root;
+
+        if (curr == null) {
+            curr = new Node<>(value,null);
+            root = curr;
+        } else {
+            while (true) {
+                int cmp = compare(curr.value, value);
+                if (cmp == 0) {
+                    return false;
+                } else if (cmp < 0) {
+                    if (curr.right != null) {
+                        curr = curr.right;
+                    } else {
+                        curr.right = new Node<>(value,curr);
+                        curr = curr.right;
+                        break;
+                    }
+                } else {
+                    if (curr.left != null) {
+                        curr = curr.left;
+                    } else {
+                        curr.left = new Node<>(value,curr);
+                        curr = curr.left;
+                        break;
+                    }
+                }
+            }
+        }
+        size++;
+
+        insertCase1(curr);
+        return true;
+    }
+
+    private void insertCase1(Node<E> node) {
+        if (node.parent == null) {
+            node.color = Color.BLACK;
+        } else {
+            insertCase2(node);
+        }
+    }
+
+    private void insertCase2(Node<E> node) {
+        if (getParent(node).color == Color.BLACK) {
+            return;
+        } else {
+            insertCase3(node);
+        }
+    }
+
+    private void insertCase3(Node<E> node) {
+        Node<E> uncle = getUncle(node);
+        Node<E> granddad;
+
+        if ((uncle != null) && (uncle.color == Color.RED)) {
+            (node.parent).color = Color.BLACK;
+            uncle.color = Color.BLACK;
+            granddad = getGranddad(node);
+            granddad.color = Color.RED;
+            insertCase1(granddad);
+        } else {
+            insertCase4(node);
+        }
+    }
+
+    private void insertCase4(Node<E> node) {
+        Node<E> granddad = getGranddad(node);
+
+        if ((node == getRight(getParent(node))) && (getParent(node) == getLeft(granddad))) {
+            rotateLeft(getParent(node));
+            node = getLeft(node);
+        } else if ((node == getLeft(getParent(node))) && (getParent(node) == getRight(granddad))) {
+            rotateRight(getParent(node));
+            node = getRight(node);
+        }
+        insertCase5(node);
+    }
+
+    private void insertCase5(Node<E> node) {
+        Node<E> granddad = getGranddad(node);
+
+        (node.parent).color = Color.BLACK;
+        granddad.color = Color.RED;
+        if ((node == getLeft(getParent(node))) && (getParent(node) == getLeft(granddad))) {
+            rotateRight(granddad);
+        } else {
+            rotateLeft(granddad);
+        }
     }
 
     /**
@@ -44,7 +130,6 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
     public boolean remove(Object object) {
         @SuppressWarnings("unchecked")
         E value = (E) object;
-        //todo: следует реализовать
         return false;
     }
 
@@ -59,7 +144,19 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
     public boolean contains(Object object) {
         @SuppressWarnings("unchecked")
         E value = (E) object;
-        //todo: следует реализовать
+        if (root != null) {
+            Node<E> curr = root;
+            while (curr != null) {
+                int cmp = compare(curr.value, value);
+                if (cmp == 0) {
+                    return true;
+                } else if (cmp < 0) {
+                    curr = curr.right;
+                } else {
+                    curr = curr.left;
+                }
+            }
+        }
         return false;
     }
 
@@ -70,9 +167,17 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
      */
     @Override
     public E first() {
-        //todo: следует реализовать
-        throw new NoSuchElementException("first");
+        if (root == null) {
+            throw new NoSuchElementException("first");
+        } else {
+            Node<E> min = root;
+            while (min.left != null) {
+                min = min.left;
+            }
+            return  min.value;
+        }
     }
+
 
     /**
      * Ищет наибольший элемент в дереве
@@ -81,8 +186,61 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
      */
     @Override
     public E last() {
-        //todo: следует реализовать
-        throw new NoSuchElementException("last");
+        if (root == null) {
+            throw new NoSuchElementException("last");
+        } else {
+            Node<E> max = root;
+            while (max.right != null) {
+                max = max.right;
+            }
+            return max.value;
+        }
+    }
+
+    private void rotateLeft(Node<E> node) {
+        Node<E> pivot = getRight(node);
+        if (getParent(node) != null) {
+            if (getLeft(getParent(node)) == node) {
+                (node.parent).left = pivot;
+            } else {
+                (node.parent).right = pivot;
+            }
+        }
+
+        node.right = getLeft(pivot);
+        if (getLeft(pivot) != null) {
+            (pivot.left).parent = node;
+        }
+
+        pivot.parent = node.parent;
+        pivot.left = node;
+        node.parent = pivot;
+        if (getParent(pivot) == null) {
+            root = pivot;
+        }
+    }
+
+    private void rotateRight(Node<E> node) {
+        Node<E> pivot = getLeft(node);
+        if (getParent(node) != null) {
+            if (getLeft(getParent(node)) == node) {
+                (node.parent).left = pivot;
+            } else {
+                (node.parent).right = pivot;
+            }
+        }
+
+        node.left = getRight(pivot);
+        if (getRight(pivot) != null) {
+            (pivot.right).parent = node;
+        }
+
+        pivot.parent = node.parent;
+        node.parent = pivot;
+        pivot.right = node;
+        if (getParent(pivot) == null) {
+            root = pivot;
+        }
     }
 
     private int compare(E v1, E v2) {
@@ -96,7 +254,7 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
 
     @Override
     public int size() {
-        return 0;
+        return size;
     }
 
     @Override
@@ -175,12 +333,53 @@ public class RedBlackTree<E extends Comparable<E>> extends AbstractSet<E> implem
         RED, BLACK
     }
 
+    private Node<E> getParent(Node<E> node) {
+        return node == null ? null : node.parent;
+    }
+
+    private Node<E> getLeft(Node<E> node) {
+        return node == null ? null : node.left;
+    }
+
+    private Node<E> getRight(Node<E> node) {
+        return node == null ? null : node.right;
+    }
+
+    private Node<E> getBrother(Node<E> node) {
+        if (node == getLeft(getParent(node))) {
+            return getRight(getParent(node));
+        } else {
+            return getLeft(getParent(node));
+        }
+    }
+
+    private Node<E> getGranddad(Node<E> node) {
+        return getParent(getParent(node));
+    }
+
+    private Node<E> getUncle(Node<E> node) {
+        Node<E> granddad = getGranddad(node);
+        if (granddad == null) {
+            return null;
+        } else if (node.parent == granddad.left) {
+            return granddad.right;
+        } else {
+            return granddad.left;
+        }
+    }
+
     static final class Node<E> {
         E value;
         Node<E> left;
         Node<E> right;
         Node<E> parent;
         Color color = Color.BLACK;
+
+        public Node(E value,Node<E> parent) {
+            this.value = value;
+            this.parent = parent;
+            this.color = Color.RED;
+        }
 
         @Override
         public String toString() {
