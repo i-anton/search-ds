@@ -35,7 +35,7 @@ public class Student extends CheckedOpenHashTableEntity {
     }
 
     private int h2(int tableSIze) {
-        int hash = (int) (tableSIze * (HASH_A * Math.abs(hashCode()) - (int) (HASH_A * Math.abs(hashCode()))));
+        int hash = (int) (tableSIze * (HASH_A * Math.abs(hashCode29()) - (int) (HASH_A * Math.abs(hashCode29()))));
         return hash + (1 - (hash % 2));
     }
 
@@ -145,6 +145,20 @@ public class Student extends CheckedOpenHashTableEntity {
         result = 31 * result + (photoReference != null ? photoReference.hashCode() : 0);
         result = 31 * result + (email != null ? email.hashCode() : 0);
         result = 31 * result + (mobile != null ? mobile.hashCode() : 0);
+        return result;
+    }
+
+    public int hashCode29() {
+        int result = (int) (id ^ (id >>> 32));
+        result = 29 * result + firstName.hashCode();
+        result = 29 * result + lastName.hashCode();
+        result = 29 * result + gender.hashCode();
+        result = 29 * result + birthday.hashCode();
+        result = 29 * result + groupId;
+        result = 29 * result + yearOfAdmission;
+        result = 29 * result + (photoReference != null ? photoReference.hashCode() : 0);
+        result = 29 * result + (email != null ? email.hashCode() : 0);
+        result = 29 * result + (mobile != null ? mobile.hashCode() : 0);
         return result;
     }
 
